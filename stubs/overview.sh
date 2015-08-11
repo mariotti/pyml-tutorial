@@ -4,6 +4,8 @@ pmdatadir="../data/"
 pmdataufile="u.data"
 #
 gplt="../bin/gplot.csh"
+#dogplt="gplot"
+dogplt="NOgplot"
 #
 echo "---"
 echo ""
@@ -66,9 +68,66 @@ echo ""
 echo "---"
 #
 echo ""
-echo "Vote distribution per Users"
+echo "Number of votes distribution per each Users (anonymized)"
 echo ""
-cat ${pmdatadir}${pmdataufile} | awk '{print $1;}' | sort -n | uniq -c | awk '{print $1;}' | sort -nr | nl > x.$$.uvd
-${gplt} x.$$.uvd
-rm x.$$.uvd
+cat ${pmdatadir}${pmdataufile} | awk '{print $1;}' | sort -n | uniq -c | awk '{print $1;}' | sort -nr | nl > x.$$.uvud
+echo "Number of votes of the highest voter: " `head -1 x.$$.uvud`
+if [ ${dogplt} == "gplot" ];
+then
+    ${gplt} x.$$.uvud
+    rm x.$$.uvud
+fi
+#
+echo ""
+echo "---"
+#
+echo ""
+echo "Number of votes distribution per user"
+echo ""
+cat ${pmdatadir}${pmdataufile} | awk '{print $1;}' | sort -n | uniq -c | awk '{print $1;}' | sort -n | uniq -c | awk '{print $2,$1;}' > x.$$.uvtd
+if [ ${dogplt} == "gplot" ];
+then
+    ${gplt} x.$$.uvtd
+    rm x.$$.uvtd
+fi
+#
+#
+echo ""
+echo "---"
+#
+echo ""
+echo "Number of votes distribution per each Movie (anonymized)"
+echo ""
+cat ${pmdatadir}${pmdataufile} | awk '{print $2;}' | sort -n | uniq -c | awk '{print $1;}' | sort -nr | nl > x.$$.mvmd
+echo "Number of votes of the highest voted movie: " `head -1 x.$$.mvmd`
+if [ ${dogplt} == "gplot" ];
+then
+    ${gplt} x.$$.mvmd
+    rm x.$$.mvmd
+fi
+#
+echo ""
+echo "---"
+#
+echo ""
+echo "Number of votes distribution per movie"
+echo ""
+cat ${pmdatadir}${pmdataufile} | awk '{print $2;}' | sort -n | uniq -c | awk '{print $1;}' | sort -n | uniq -c | awk '{print $2,$1;}' > x.$$.mvtd
+if [ ${dogplt} == "gplot" ];
+then
+    ${gplt} x.$$.mvtd
+    rm x.$$.mvtd
+fi
+#
+###############################
+###############################
+#
+# Prepare CSV
+cat ${pmdatadir}${pmdataufile} | sort -n -k 1,1 -k 2,2 | awk '{printf("%s,%s,%s,%s\n",$1,$2,$3,$4);}' > u.csv
+
+
+#
+##############################
+##############################
+rm x.*
 #
