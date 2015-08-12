@@ -119,6 +119,19 @@ then
     rm x.$$.mvtd
 fi
 #
+echo ""
+echo "---"
+#
+echo ""
+echo "Rating Distribution"
+echo ""
+cat ${pmdatadir}${pmdataufile} | awk '{print $3;}' | sort -n | uniq -c | awk '{print $2,$1;}' > x.$$.rtd
+if [ ${dogplt} == "gplot" ];
+then
+    ${gplt} x.$$.rtd
+    rm x.$$.rtd
+fi
+#
 ###############################
 ###############################
 #
