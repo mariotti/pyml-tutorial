@@ -4,8 +4,8 @@ pmdatadir="../data/"
 pmdataufile="u.data"
 #
 gplt="../bin/gplot.csh"
-#dogplt="gplot"
-dogplt="NOgplot"
+dogplt="gplot"
+#dogplt="NOgplot"
 #
 echo "---"
 echo ""
