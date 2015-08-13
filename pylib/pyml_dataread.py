@@ -5,44 +5,60 @@ import imp
 
 class pyml_dataread:
     
+    irc = 1
+    pymldebug = False
     filename = None
     filenlines = None
-    use_numpy = False
-    irc = 0
+    use_numpy = True
 
 #-------------------------------------------------------------------------------
     def __init__(self, *pars):
         '''
         Set the default return code (irc) to 1=[no errors]
         '''
-        self.irc= 1
-        self.use_numpy = False
+        self.irc = 1
+        self.pymldebug = False
+        self.filename = None
+        self.filenlines = None
+        self.has_m_csv = True
+
+        self.use_numpy = True
+        self.has_m_numpy = True
+        self.has_m_scipy = True
+
         
         try:
-            imp.find_module('csv')
             self.has_m_csv = True
+            imp.find_module('csv')
         except ImportError:
             self.has_m_csv = False
+            self.irc = -1
 
         try:
-            imp.find_module('numpy')
             self.has_m_numpy = True
+            imp.find_module('numpy')
         except ImportError:
             self.has_m_numpy = False
+            self.irc = -2
 
         try:
-            imp.find_module('scipy')
             self.has_m_scipy = True
+            imp.find_module('scipy')
         except ImportError:
             self.has_m_numpy = False
             self.has_m_scipy = False
+            self.irc = -3
 
         if (self.has_m_numpy and self.has_m_scipy):
             self.use_numpy = True
-            if (True): print "Setting up numpy"
-
-        #self.has_m_numpy = False
-        #self.has_m_scipy = False
+        else:
+            self.use_numpy = False
+            
+        if (self.pymldebug):
+            if (self.use_numpy):
+                print "Class init setting up numpy"
+            else:
+                print "Class init cannot load numpy"
 
         if len(pars) == 1 and isinstance(pars[0], str):
             self.filename=pars[0]
@@ -84,8 +100,9 @@ class pyml_dataread:
         
         vmax = -1
 
-        if (self.use_numpy):
-            print "dict2mat using numpy"
+        if (self.pymldebug):
+            if (self.use_numpy):
+                print "dict2mat using numpy"
             
         if (self.use_numpy):
             import numpy as np
@@ -107,7 +124,7 @@ class pyml_dataread:
                     if (val > vmax):
                         vmax = val
 
-                    if (False):
+                    if (self.pymldebug):
                         print '{0:5} {1:5} {2:5} {3:5}'.format(i,j,ik,jk)
                         print '{0:5} {1:5} {2:5} {3:5} {4:5}'.format(' ',' ',' ',' ',val)
 
@@ -128,10 +145,11 @@ class pyml_dataread:
                     if (val > vmax):
                         vmax = val
 
-                    if (False):
+                    if (self.pymldebug):
                         print '{0:5} {1:5} {2:5} {3:5}'.format(i,j,ik,jk)
                         print '{0:5} {1:5} {2:5} {3:5} {4:5}'.format(' ',' ',' ',' ',val)
-        if (True):
+                        
+        if (self.pymldebug):
             print "Max in sub", vmax
         
         return amat
@@ -150,9 +168,11 @@ class pyml_dataread:
         midx = 0
 
         if self.filename == None:
+            self.irc = -4
             return None
 
         if self.filenlines == None:
+            self.irc = -5
             return None
 
         f = open(self.filename)
@@ -160,12 +180,12 @@ class pyml_dataread:
 
         for l in f:
             
-            if (False):
+            if (self.pymldebug):
                 print "Line", l
 
             fields = l.split()
             
-            if (False):
+            if (self.pymldebug):
                 print "Fileds: 1: ", fields[0], " - 2: ", fields[1], " - 3: ", fields[2], " - 4: ", fields[3]
 
             if matdict.has_key(fields[0]):
@@ -186,10 +206,78 @@ class pyml_dataread:
                 midxdict[fields[1]] = midx
                 midx += 1
 
-            if (False):
+            if (self.pymldebug):
                 print '{0:5} {1:5} {2:5} {3:5} {4:5} {5:5}'.format(fields[0],fields[1],fields[2],uidxdict[fields[0]],midxdict[fields[1]],matdict[fields[0]][fields[1]])
                 
 
         amat = self.dict2mat(matdict,uidxdict,midxdict)
 
         return amat
+
+
+
+#-------------------------------------------------------------------------------
+    def read_csv_umrd(self):
+
+        if (self.has_m_csv):
+            import csv
+        else:
+            self.irc = -8
+            return None
+        
+        self.filenlines = self.get_file_lines()
+        
+        uidxdict = dict()
+        midxdict = dict()
+        matdict = dict(dict())
+        movdict = dict()
+
+        uidx = 0
+        midx = 0
+
+        if self.filename == None:
+            self.irc = -6
+            return None
+
+        if self.filenlines == None:
+            self.irc = -7
+            return None
+
+        csvfile = open(self.filename, "rb")
+        dialect = csv.Sniffer().sniff(csvfile.read(1024))
+        csvfile.seek(0)
+
+        #initiate reader
+        csvreader = csv.reader(csvfile, dialect)
+        
+        for row in csvreader:
+            
+            if (self.pymldebug):
+                print "Line", row
+
+            if matdict.has_key(row[0]):
+
+                if matdict[row[0]].has_key(row[1]):
+                    print "ERROR _ duplicated vote"
+                    exit()
+
+            else:
+                matdict[row[0]] = dict()
+                uidxdict[row[0]] = uidx
+                uidx += 1
+
+            matdict[row[0]][row[1]] = row[2]
+
+            if not movdict.has_key(row[1]):
+                movdict[row[1]] = dict()
+                midxdict[row[1]] = midx
+                midx += 1
+
+            if (self.pymldebug):
+                print '{0:5} {1:5} {2:5} {3:5} {4:5} {5:5}'.format(row[0],row[1],row[2],uidxdict[row[0]],midxdict[row[1]],matdict[row[0]][row[1]])
+                
+
+        amat = self.dict2mat(matdict,uidxdict,midxdict)
+
+        return amat
+    
