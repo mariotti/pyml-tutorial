@@ -7,13 +7,16 @@ class pyml_dataread:
     
     filename = None
     filenlines = None
+    use_numpy = False
+    irc = 0
 
 #-------------------------------------------------------------------------------
     def __init__(self, *pars):
         '''
         Set the default return code (irc) to 1=[no errors]
         '''
-        self.irc=1
+        self.irc= 1
+        self.use_numpy = False
         
         try:
             imp.find_module('csv')
@@ -33,6 +36,10 @@ class pyml_dataread:
         except ImportError:
             self.has_m_numpy = False
             self.has_m_scipy = False
+
+        if (self.has_m_numpy and self.has_m_scipy):
+            self.use_numpy = True
+            if (True): print "Setting up numpy"
 
         #self.has_m_numpy = False
         #self.has_m_scipy = False
@@ -76,8 +83,11 @@ class pyml_dataread:
         no = len(otr)
         
         vmax = -1
+
+        if (self.use_numpy):
+            print "dict2mat using numpy"
             
-        if self.has_m_numpy:
+        if (self.use_numpy):
             import numpy as np
             from scipy import sparse
 

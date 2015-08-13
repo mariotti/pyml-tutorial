@@ -1,9 +1,31 @@
-#! /usr/local/bin/python
+#! /usr/bin/python
 
 class myClass:
     theint = 0
 
     def __init__(self, *pars):
+        if len(pars) == 1 and isinstance(pars[0], int):
+            self.theint = pars[0]
+            
+    def set_theint(self,ival):
+        self.theint = ival
+
+    def print_theint(self):
+        print "Within the class", self.theint
+
+    def set_theint(self,vint):
+        self.theint = vint
+
+    def get_theint(self):
+        return self.theint
+
+class myDefClass:
+    theint = 0
+
+    def __init__(self, *pars):
+
+        self.theint = 1000
+        
         if len(pars) == 1 and isinstance(pars[0], int):
             self.theint = pars[0]
             
@@ -80,6 +102,13 @@ print "e theint", e.theint, 10
 print " CLASS theint to 666"
 myClass.theint = 666
 print "e theint", e.theint, 10, "Warning! Calling 'myClass.theint = 666' changed the e instance value!"
+
+f = myDefClass()
+print "f theint", f.theint, 1000
+print " CLASS theint to 666"
+myDefClass.theint = 666
+print "f theint", f.theint, 1000, "As Expected"
+
 print "Restoring CLASS to 10"
 myClass.theint = 10
 
